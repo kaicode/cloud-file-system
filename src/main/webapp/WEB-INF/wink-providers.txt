@@ -1,0 +1,1 @@
+com.kaicube.cloud.filemanager.rest.FileManager
