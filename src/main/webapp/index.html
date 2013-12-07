@@ -1,0 +1,45 @@
+<!doctype html>
+<html ng-app="app">
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-resource.min.js"></script>
+		<script>
+			var $app = angular.module("app", []);
+			$app.controller('FileManagerCtrl', function($scope, $http) {
+
+				$http.get('REST/directory-tree').success(function(data) {
+					$scope.directories = data;
+				});
+
+				$scope.loadDirectory = function(directory) {
+					console.log("loading " + directory.name);
+					$scope.selectedDirectory = directory;
+					$scope.files = [];
+					$http.get('REST/file-list/' + directory.name).success(function(data) {
+						if ($scope.selectedDirectory == directory) {
+							$scope.files = data;
+						}
+					});
+				}
+
+			})
+		</script>
+	</head>
+	<body>
+		<div ng-controller="FileManagerCtrl">
+			Directories
+			<ul>
+				<li ng-repeat="directory in directories">
+					<a ng-click="loadDirectory(directory)">{{directory.name}}</a>
+				</li>
+			</ul>
+
+			Files
+			<ul>
+				<li ng-repeat="file in files">
+					<a href="REST/file/{{selectedDirectory.name}}/{{file.name}}" download>{{file.name}}</a>
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>

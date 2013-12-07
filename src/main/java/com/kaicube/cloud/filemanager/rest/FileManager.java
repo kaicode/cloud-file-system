@@ -6,12 +6,14 @@ import com.kaicube.cloud.filemanager.io.FileSystemFactory;
 import com.kaicube.cloud.filemanager.io.FileSystemFactoryException;
 import org.apache.wink.json4j.JSONArray;
 import org.apache.wink.json4j.JSONException;
+import org.apache.wink.json4j.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -38,7 +40,8 @@ public class FileManager {
 	@Produces(APPLICATION_JSON)
 	public JSONArray directoryTree() throws WebApplicationException, JSONException {
 		try {
-			return new JSONArray(fileSystem.directoryTree());
+			List<String> directories = fileSystem.directoryTree();
+			return listToJsonObjectsWithName(directories);
 		} catch (FileSystemException e) {
 			throw new WebApplicationException(e, e.getStatusCode());
 		}
@@ -50,7 +53,8 @@ public class FileManager {
 	public JSONArray listFiles(@PathParam("dirPath") String dirPath) throws FileSystemException, JSONException {
 		try {
 			logger.info("list files '{}'", dirPath);
-			return new JSONArray(fileSystem.listFiles(dirPath));
+			List<String> files = fileSystem.listFiles(dirPath);
+			return listToJsonObjectsWithName(files);
 		} catch (FileSystemException e) {
 			throw new WebApplicationException(e, e.getStatusCode());
 		}
@@ -77,6 +81,16 @@ public class FileManager {
 		} catch (FileSystemException e) {
 			throw new WebApplicationException(e, e.getStatusCode());
 		}
+	}
+
+	private JSONArray listToJsonObjectsWithName(List<String> directories) throws JSONException {
+		JSONArray jsonArray = new JSONArray();
+		for (String directory : directories) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", directory);
+			jsonArray.add(jsonObject);
+		}
+		return jsonArray;
 	}
 
 }
