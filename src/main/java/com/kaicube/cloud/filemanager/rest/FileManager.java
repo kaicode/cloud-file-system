@@ -4,6 +4,8 @@ import com.kaicube.cloud.filemanager.io.FileSystem;
 import com.kaicube.cloud.filemanager.io.FileSystemException;
 import com.kaicube.cloud.filemanager.io.FileSystemFactory;
 import com.kaicube.cloud.filemanager.io.FileSystemFactoryException;
+import org.apache.wink.common.model.multipart.BufferedInMultiPart;
+import org.apache.wink.common.model.multipart.InPart;
 import org.apache.wink.json4j.JSONArray;
 import org.apache.wink.json4j.JSONException;
 import org.apache.wink.json4j.JSONObject;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -74,9 +77,11 @@ public class FileManager {
 
 	@POST
 	@Path("/file/{filePath: .*}")
-	@Consumes
-	public void saveFile(InputStream fileData, @PathParam("filePath") String filePath) throws FileSystemException {
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public void saveFile(BufferedInMultiPart bufferedInMultiPart, @PathParam("filePath") String filePath) throws FileSystemException {
 		try {
+			InPart inPart = bufferedInMultiPart.getParts().get(0);
+			InputStream fileData = inPart.getInputStream();
 			fileSystem.saveFile(filePath, fileData);
 		} catch (FileSystemException e) {
 			throw new WebApplicationException(e, e.getStatusCode());
