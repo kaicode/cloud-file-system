@@ -78,11 +78,13 @@ public class FileManager {
 	@POST
 	@Path("/file/{filePath: .*}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public void saveFile(BufferedInMultiPart bufferedInMultiPart, @PathParam("filePath") String filePath) throws FileSystemException {
+	@Produces(APPLICATION_JSON)
+	public JSONObject saveFile(BufferedInMultiPart bufferedInMultiPart, @PathParam("filePath") String filePath) throws FileSystemException {
 		try {
 			InPart inPart = bufferedInMultiPart.getParts().get(0);
 			InputStream fileData = inPart.getInputStream();
 			fileSystem.saveFile(filePath, fileData);
+			return new JSONObject();
 		} catch (FileSystemException e) {
 			throw new WebApplicationException(e, e.getStatusCode());
 		}

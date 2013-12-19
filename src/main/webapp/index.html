@@ -1,10 +1,13 @@
 <!doctype html>
 <html ng-app="app">
 	<head>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-resource.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-resource.min.js"></script>
+		<script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script src="js/ng-upload.min.js"></script>
 		<script>
-			var $app = angular.module("app", []);
+			var $app = angular.module("app", ["ngUpload"]);
+			var $fileManagerScope;
 			$app.controller('FileManagerCtrl', function($scope, $http) {
 
 				$http.get('REST/directory-tree').success(function(data) {
@@ -21,6 +24,13 @@
 						}
 					});
 				}
+
+				$scope.uploadComplete = function() {
+					console.log("uploadComplete");
+					$scope.loadDirectory($scope.selectedDirectory);
+				}
+
+				$fileManagerScope = $scope;
 
 			})
 		</script>
@@ -40,6 +50,20 @@
 					<a href="REST/file/{{selectedDirectory.name}}/{{file.name}}" download>{{file.name}}</a>
 				</li>
 			</ul>
+
+			<form name="uploadForm" ng-upload="uploadComplete()" action="REST/file/dir/file" >
+				<input type="file" name="file"/>
+				<input type="submit" />
+			</form>
 		</div>
+
+		<script>
+			$('input[type="file"]').on('change', function() {
+				var filename = $(this).val().split('\\').pop();
+				var directory = $fileManagerScope.selectedDirectory.name;
+				$('form').attr('action', 'REST/file/' + directory + '/' + filename);
+			})
+		</script>
+
 	</body>
 </html>
